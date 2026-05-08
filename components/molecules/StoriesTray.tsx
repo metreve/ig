@@ -57,7 +57,7 @@ export default function StoriesTray() {
                 story.isYou && "bg-zinc-300 dark:bg-zinc-700",
               )}
             >
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-white dark:bg-black">
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-white dark:bg-[#0c1014]">
                 <img
                   src={story.avatar}
                   alt={story.username}

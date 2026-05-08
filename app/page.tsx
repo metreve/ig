@@ -1,9 +1,9 @@
 import FeedPage from "./FeedClient"
 
-function page() {
+function Page() {
   return (
     <FeedPage />
   )
 }
 
-export default page
+export default Page

@@ -14,7 +14,7 @@ export default function FeedClient() {
   }, [dark]);
 
   return (
-    <div className="flex min-h-screen bg-white text-black transition-colors dark:bg-black dark:text-white">
+    <div className="flex min-h-screen bg-white text-black transition-colors dark:bg-[#0c1014] dark:text-white">
       <Sidebar />
       <Feed />
       <MobileNav />

@@ -12,6 +12,10 @@ export const stories = [
   { id: 11, username: "chris.p", avatar: "https://i.pravatar.cc/56?img=11" },
   { id: 12, username: "wilxbursoot", avatar: "https://i.pravatar.cc/56?img=12" },
   { id: 13, username: "jackbeagans", avatar: "https://i.pravatar.cc/56?img=13" },
+  { id: 14, username: "sophia.l", avatar: "https://i.pravatar.cc/56?img=14" },
+  { id: 15, username: "michael.b", avatar: "https://i.pravatar.cc/56?img=15" },
+  { id: 16, username: "olivia.m", avatar: "https://i.pravatar.cc/56?img=16" },
+  { id: 17, username: "daniel.s", avatar: "https://i.pravatar.cc/56?img=17" },
 ];
 
 export const posts = [

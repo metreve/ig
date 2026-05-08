@@ -33,15 +33,13 @@ export default function Sidebar() {
   const [activeItem, setActiveItem] = useState("Home");
 
   return (
-    <aside className="group/sidebar fixed left-0 top-0 z-50 hidden h-screen w-20 flex-col bg-white px-3 py-6 text-zinc-950 transition-all duration-300 hover:w-[245px] dark:bg-black dark:text-white md:flex">
-      {/* Logo */}
+    <aside className="group/sidebar fixed left-0 top-0 z-50 hidden h-screen w-20 flex-col bg-white px-3 py-6 text-zinc-950 transition-all duration-300 hover:w-[245px] dark:bg-[#0c1014] dark:text-white md:flex">
       <div className="mb-28 flex h-10 items-center px-3">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center">
           <InstagramLogoIcon size={24} />
         </div>
       </div>
 
-      {/* Main nav */}
       <nav className="flex flex-1 flex-col gap-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -86,7 +84,6 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Profile */}
         <Link
           href="#"
           onClick={() => setActiveItem("Profile")}
@@ -110,7 +107,6 @@ export default function Sidebar() {
         </Link>
       </nav>
 
-      {/* Bottom nav */}
       <div className="mt-auto flex flex-col gap-2">
         <button
           onClick={toggleDark}

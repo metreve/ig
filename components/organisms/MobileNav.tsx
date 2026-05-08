@@ -2,31 +2,45 @@
 "use client";
 
 import Link from "next/link";
-
+import { Bell, Compass, CompassIcon, Menu, Plus, User } from "lucide-react";
 import {
-  House,
-  Search,
-  Clapperboard,
-  Heart,
-  User,
-} from "lucide-react";
+  DashboardIcon,
+  HomeOutlineIcon,
+  InstagramLogoIcon,
+  MessagesIcon,
+  MetaIcon,
+  ReelsFilledIcon,
+  SearchIcon,
+  NotificationsIcon,
+  ReelsIcon
+} from "../atoms/InstagramIcons";
 
 const items = [
   {
     href: "/",
-    icon: House,
+    icon: HomeOutlineIcon,
   },
   {
     href: "#",
-    icon: Search,
+    icon: CompassIcon,
   },
   {
     href: "#",
-    icon: Clapperboard,
+    icon: ReelsIcon,
+  },
+
+  {
+    href: "#",
+    icon: Plus,
   },
   {
     href: "#",
-    icon: Heart,
+    icon: MessagesIcon,
+  },
+
+  {
+    href: "#",
+    icon: DashboardIcon,
   },
   {
     href: "#",
