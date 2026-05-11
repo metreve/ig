@@ -1,10 +1,12 @@
-export interface Post {
-  id: number;
+export type Post = {
+  id: string;
+  userId: string;
   username: string;
-  avatar: string;
-  timeAgo: string;
-  image: string;
-  likes: number;
+  userAvatar: string;
   caption: string;
-  comments: number;
-}
+  imageUrl: string;
+  likesCount: number;
+  commentsCount: number;
+  savesCount: number;
+  createdAt: Date | null;
+};

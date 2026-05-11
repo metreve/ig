@@ -1,12 +1,27 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import AuthProvider from "@/components/organisms/AuthProvider";
 
-export const metadata: Metadata = { title: "Instagram" };
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-optimistic-fallback",
+});
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const metadata: Metadata = {
+  title: "Instagram",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning>{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body suppressHydrationWarning>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

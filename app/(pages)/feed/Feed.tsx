@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import Feed from "../components/organisms/Feed";
-import Sidebar from "../components/organisms/SideBar";
-import MobileNav from "../components/organisms/MobileNav";
-import { useUIStore } from "../store/ui.store";
+import Feed from "@/components/organisms/Feed";
+import Sidebar from "@/components/organisms/SideBar";
+import MobileNav from "@/components/organisms/MobileNav";
+import { useUIStore } from "@/store/ui.store";
 
 export default function FeedClient() {
   const dark = useUIStore((state) => state.dark);
