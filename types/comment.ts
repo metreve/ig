@@ -5,5 +5,5 @@ export type Comment = {
   username: string;
   userAvatar: string;
   text: string;
-  createdAt: Date;
+  createdAt: Date | null;
 };

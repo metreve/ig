@@ -3,6 +3,7 @@ type IconProps = {
   size?: number;
 };
 
+
 export function InstagramLogoIcon({ className, size = 24 }: IconProps) {
   return (
     <svg
@@ -236,4 +237,101 @@ export function NotificationsIcon({ className, size = 24 }: IconProps) {
         <path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z"></path>
         </svg>
     )
+}
+
+
+export function ProfilePostsIcon({
+  size = 24,
+  className,
+}: IconProps) {
+  return (
+    <svg
+      aria-label="Posts"
+      fill="currentColor"
+      height={size}
+      role="img"
+      viewBox="0 0 24 24"
+      width={size}
+      className={className}
+    >
+      <title>Posts</title>
+      <rect height="6" rx="1" ry="1" width="4.667" x="3" y="1" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="16.333" y="1" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="9.667" y="1" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="3" y="9" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="16.333" y="9" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="9.667" y="9" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="3" y="17" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="16.333" y="17" />
+      <rect height="6" rx="1" ry="1" width="4.667" x="9.667" y="17" />
+    </svg>
+  );
+}
+
+export function ProfileSavedIcon({
+  size = 24,
+  className,
+}: IconProps) {
+  return (
+    <svg
+      aria-label="Saved"
+      fill="currentColor"
+      height={size}
+      role="img"
+      viewBox="0 0 24 24"
+      width={size}
+      className={className}
+    >
+      <title>Saved</title>
+      <polygon
+        fill="none"
+        points="20 21 12 13.44 4 21 4 3 20 3 20 21"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+export function ProfileRepostsIcon({
+  size = 24,
+  className,
+}: IconProps) {
+  return (
+    <svg
+      aria-label="Reposts"
+      fill="currentColor"
+      height={size}
+      role="img"
+      viewBox="0 0 24 24"
+      width={size}
+      className={className}
+    >
+      <title>Reposts</title>
+      <path d="M19.998 9.497a1 1 0 0 0-1 1v4.228a3.274 3.274 0 0 1-3.27 3.27h-5.313l1.791-1.787a1 1 0 0 0-1.412-1.416L7.29 18.287a1.004 1.004 0 0 0-.294.707v.001c0 .023.012.042.013.065a.923.923 0 0 0 .281.643l3.502 3.504a1 1 0 0 0 1.414-1.414l-1.797-1.798h5.318a5.276 5.276 0 0 0 5.27-5.27v-4.228a1 1 0 0 0-1-1zm-6.41-3.496-1.795 1.795a1 1 0 1 0 1.414 1.414l3.5-3.5a1.003 1.003 0 0 0 0-1.417l-3.5-3.5a1 1 0 0 0-1.414 1.414l1.794 1.794H8.27A5.277 5.277 0 0 0 3 9.271V13.5a1 1 0 0 0 2 0V9.271a3.275 3.275 0 0 1 3.271-3.27z" />
+    </svg>
+  );
+}
+
+export function ProfileTaggedIcon({
+  size = 24,
+  className,
+}: IconProps) {
+  return (
+    <svg
+      aria-label="Tagged"
+      fill="currentColor"
+      height={size}
+      role="img"
+      viewBox="0 0 24 24"
+      width={size}
+      className={className}
+    >
+      <title>Tagged</title>
+      <path d="M21 7.48a2 2 0 0 0-2-2h-3.046a2.002 2.002 0 0 1-1.506-.683l-1.695-1.939a1 1 0 0 0-1.506 0L9.552 4.797c-.38.434-.93.682-1.506.682H5a2 2 0 0 0-2 2V19l.01.206A2 2 0 0 0 5 21h14a2 2 0 0 0 2-2V7.48ZM23 19a4 4 0 0 1-4 4H5a4 4 0 0 1-3.995-3.794L1 19V7.48a4 4 0 0 1 4-4h3.046l1.696-1.94a3 3 0 0 1 4.516 0l1.696 1.94H19a4 4 0 0 1 4 4V19Z" />
+      <path d="M14.5 10.419a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Zm2 0a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM12 16.003c3.511 0 6.555 1.99 8.13 4.906a1 1 0 0 1-1.76.95c-1.248-2.31-3.64-3.857-6.37-3.857S6.878 19.55 5.63 21.86a1 1 0 0 1-1.76-.951c1.575-2.915 4.618-4.906 8.13-4.906Z" />
+    </svg>
+  );
 }

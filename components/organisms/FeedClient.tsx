@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import Feed from "@/components/organisms/Feed";
 import Sidebar from "@/components/organisms/SideBar";
 import MobileNav from "@/components/organisms/MobileNav";

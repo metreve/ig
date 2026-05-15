@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import { hasUserLikedPost, togglePostLike } from "@/lib/posts";
+import {
+  hasUserLikedPost,
+  hasUserSavedPost,
+  togglePostLike,
+  togglePostSave,
+} from "@/lib/posts";
 import { useAuthStore } from "@/store/auth.store";
 
 type UseLikePostParams = {
@@ -16,32 +21,37 @@ export function useLikePost({ postId, initialLikes }: UseLikePostParams) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
-  const [loading, setLoading] = useState(false);
+
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => {
-    async function checkLikeStatus() {
+    async function loadPostStatus() {
       if (!user) return;
 
       try {
-        const userLiked = await hasUserLikedPost(postId, user.uid);
+        const [userLiked, userSaved] = await Promise.all([
+          hasUserLikedPost(postId, user.uid),
+          hasUserSavedPost(postId, user.uid),
+        ]);
+
         setLiked(userLiked);
+        setSaved(userSaved);
       } catch (error) {
-        console.error("Failed to check like status:", error);
+        console.error("Failed to load post status:", error);
       }
     }
 
-    checkLikeStatus();
+    loadPostStatus();
   }, [postId, user]);
 
   async function toggleLike() {
-    if (!user || loading) return;
+    if (!user || likeLoading) return;
 
     const previousLiked = liked;
     const previousLikes = likes;
 
-    setLoading(true);
-
-    // Optimistic UI update
+    setLikeLoading(true);
     setLiked(!previousLiked);
     setLikes((current) => current + (previousLiked ? -1 : 1));
 
@@ -54,16 +64,34 @@ export function useLikePost({ postId, initialLikes }: UseLikePostParams) {
     } catch (error) {
       console.error("Failed to toggle like:", error);
 
-      // Revert if Firebase fails
       setLiked(previousLiked);
       setLikes(previousLikes);
     } finally {
-      setLoading(false);
+      setLikeLoading(false);
     }
   }
 
-  function toggleSave() {
-    setSaved((value) => !value);
+  async function toggleSave() {
+    if (!user || saveLoading) return;
+
+    const previousSaved = saved;
+
+    setSaveLoading(true);
+    setSaved(!previousSaved);
+
+    try {
+      await togglePostSave({
+        postId,
+        userId: user.uid,
+        currentlySaved: previousSaved,
+      });
+    } catch (error) {
+      console.error("Failed to toggle save:", error);
+
+      setSaved(previousSaved);
+    } finally {
+      setSaveLoading(false);
+    }
   }
 
   return {
@@ -72,6 +100,7 @@ export function useLikePost({ postId, initialLikes }: UseLikePostParams) {
     likes,
     toggleLike,
     toggleSave,
-    loading,
+    likeLoading,
+    saveLoading,
   };
 }

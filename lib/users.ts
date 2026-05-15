@@ -1,8 +1,12 @@
 import {
+  collection,
   doc,
   getDoc,
+  getDocs,
+  query,
   serverTimestamp,
   setDoc,
+  where,
   writeBatch,
 } from "firebase/firestore";
 
@@ -21,6 +25,65 @@ type CreateUserProfileParams = {
   displayName: string;
   birthday?: Birthday;
 };
+
+import { deleteDoc, updateDoc } from "firebase/firestore";
+
+type UpdateUserProfileParams = {
+  uid: string;
+  oldUsername: string;
+  newUsername: string;
+  displayName: string;
+  bio: string;
+  photoURL: string;
+};
+
+export async function updateUserProfile({
+  uid,
+  oldUsername,
+  newUsername,
+  displayName,
+  bio,
+  photoURL,
+}: UpdateUserProfileParams) {
+  if (!db) throw new Error("Firestore is not initialized.");
+
+  const normalizedOldUsername = normalizeUsername(oldUsername);
+  const normalizedNewUsername = normalizeUsername(newUsername);
+
+  const userRef = doc(db, "users", uid);
+  const oldUsernameRef = doc(db, "usernames", normalizedOldUsername);
+  const newUsernameRef = doc(db, "usernames", normalizedNewUsername);
+
+  if (normalizedOldUsername !== normalizedNewUsername) {
+    const usernameSnap = await getDoc(newUsernameRef);
+
+    if (usernameSnap.exists()) {
+      throw new Error("username-taken");
+    }
+  }
+
+  const batch = writeBatch(db);
+
+  batch.update(userRef, {
+    username: normalizedNewUsername,
+    displayName,
+    bio,
+    photoURL,
+    updatedAt: serverTimestamp(),
+  });
+
+  if (normalizedOldUsername !== normalizedNewUsername) {
+    batch.delete(oldUsernameRef);
+
+    batch.set(newUsernameRef, {
+      uid,
+      username: normalizedNewUsername,
+      createdAt: serverTimestamp(),
+    });
+  }
+
+  await batch.commit();
+}
 
 export function normalizeUsername(username: string) {
   return username.trim().toLowerCase();
@@ -105,4 +168,62 @@ export async function getEmailByUsername(username: string) {
   const userData = userSnapshot.data();
 
   return userData.email as string;
+}
+
+export async function getUserByUsername(username: string) {
+  if (!db) throw new Error("Firestore is not initialized.");
+
+  const normalizedUsername = normalizeUsername(username);
+
+  // 1. Preferred lookup: usernames/{username}
+  const usernameRef = doc(db, "usernames", normalizedUsername);
+  const usernameSnap = await getDoc(usernameRef);
+
+  if (usernameSnap.exists()) {
+    const usernameData = usernameSnap.data();
+
+    if (usernameData.uid) {
+      const userRef = doc(db, "users", usernameData.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+
+        return {
+          uid: data.uid,
+          email: data.email,
+          username: data.username,
+          displayName: data.displayName,
+          bio: data.bio,
+          photoURL: data.photoURL,
+          createdAt: data.createdAt?.toDate?.() ?? null,
+        };
+      }
+    }
+  }
+
+  // 2. Fallback lookup: users where username == normalizedUsername
+  const usersQuery = query(
+    collection(db, "users"),
+    where("username", "==", normalizedUsername)
+  );
+
+  const usersSnapshot = await getDocs(usersQuery);
+
+  if (usersSnapshot.empty) {
+    return null;
+  }
+
+  const userDoc = usersSnapshot.docs[0];
+  const data = userDoc.data();
+
+  return {
+    uid: data.uid,
+    email: data.email,
+    username: data.username,
+    displayName: data.displayName,
+    bio: data.bio,
+    photoURL: data.photoURL,
+    createdAt: data.createdAt?.toDate?.() ?? null,
+  };
 }
