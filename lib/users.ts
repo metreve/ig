@@ -175,7 +175,6 @@ export async function getUserByUsername(username: string) {
 
   const normalizedUsername = normalizeUsername(username);
 
-  // 1. Preferred lookup: usernames/{username}
   const usernameRef = doc(db, "usernames", normalizedUsername);
   const usernameSnap = await getDoc(usernameRef);
 
@@ -202,7 +201,6 @@ export async function getUserByUsername(username: string) {
     }
   }
 
-  // 2. Fallback lookup: users where username == normalizedUsername
   const usersQuery = query(
     collection(db, "users"),
     where("username", "==", normalizedUsername)

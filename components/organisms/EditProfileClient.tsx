@@ -1,168 +1,197 @@
-import { Loader2 } from "lucide-react";
+"use client";
 
-import ProfilePhotoCard from "../molecules/Settings/ProfilePhotoCard";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-type EditProfileFormProps = {
+import EditProfileForm from "@/components/molecules/Settings/EditProfileForm";
+import SettingsSidebar from "@/components/molecules/Settings/SettingsSidebar";
+
+import { getUserProfile, updateUserProfile } from "@/lib/users";
+import { updateUserPostAuthorData } from "@/lib/posts";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import { useAuthStore } from "@/store/auth.store";
+
+type ProfileData = {
+  uid: string;
+  email: string;
   username: string;
   displayName: string;
   bio: string;
-  previewUrl: string;
-  saving: boolean;
-  error: string;
-  onUsernameChange: (value: string) => void;
-  onDisplayNameChange: (value: string) => void;
-  onBioChange: (value: string) => void;
-  onImageChange: (file?: File) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  photoURL: string;
 };
 
-export default function EditProfileForm({
-  username,
-  displayName,
-  bio,
-  previewUrl,
-  saving,
-  error,
-  onUsernameChange,
-  onDisplayNameChange,
-  onBioChange,
-  onImageChange,
-  onSubmit,
-}: EditProfileFormProps) {
+export default function EditProfileClient() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+
+  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const [photoURL, setPhotoURL] = useState("");
+
+  const [image, setImage] = useState<File | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const previewUrl = useMemo(() => {
+    if (image) return URL.createObjectURL(image);
+    return photoURL || "";
+  }, [image, photoURL]);
+
+  useEffect(() => {
+    async function loadProfile() {
+      if (!user) {
+        setLoadingProfile(false);
+        return;
+      }
+
+      try {
+        const data = await getUserProfile(user.uid);
+
+        if (!data) {
+          setError("Profile not found.");
+          return;
+        }
+
+        const profileData = data as ProfileData;
+
+        setProfile(profileData);
+        setDisplayName(profileData.displayName || "");
+        setUsername(profileData.username || "");
+        setBio(profileData.bio || "");
+        setPhotoURL(profileData.photoURL || "");
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+        setError("Failed to load profile.");
+      } finally {
+        setLoadingProfile(false);
+      }
+    }
+
+    loadProfile();
+  }, [user]);
+
+  function handleImageChange(file?: File) {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Only image files are allowed.");
+      return;
+    }
+
+    setImage(file);
+    setError("");
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!user || !profile) {
+      setError("You must be logged in.");
+      return;
+    }
+
+    const normalizedUsername = username.trim().toLowerCase();
+
+    if (!normalizedUsername) {
+      setError("Username cannot be empty.");
+      return;
+    }
+
+    if (!displayName.trim()) {
+      setError("Name cannot be empty.");
+      return;
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9._]+$/;
+
+    if (!usernameRegex.test(normalizedUsername)) {
+      setError(
+        "Username can only contain letters, numbers, periods, and underscores.",
+      );
+      return;
+    }
+
+    if (normalizedUsername.length < 3) {
+      setError("Username must be at least 3 characters.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      let finalPhotoURL = photoURL;
+
+      if (image) {
+        finalPhotoURL = await uploadImageToCloudinary(image);
+      }
+
+      await updateUserProfile({
+        uid: user.uid,
+        oldUsername: profile.username,
+        newUsername: normalizedUsername,
+        displayName: displayName.trim(),
+        bio: bio.trim(),
+        photoURL: finalPhotoURL,
+      });
+
+      await updateUserPostAuthorData({
+        userId: user.uid,
+        username: normalizedUsername,
+        userAvatar: finalPhotoURL,
+      });
+
+      router.push(`/profile/${normalizedUsername}`);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+
+      if (err instanceof Error && err.message === "username-taken") {
+        setError("That username is already taken.");
+      } else {
+        setError("Failed to update profile.");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loadingProfile) {
+    return (
+      <main className="flex h-screen w-full items-center justify-center bg-white text-black dark:bg-[#0c1014] dark:text-white md:pl-20">
+        <p className="text-sm text-zinc-500">Loading profile...</p>
+      </main>
+    );
+  }
+
   return (
-    <form onSubmit={onSubmit}>
-      <ProfilePhotoCard
-        username={username}
-        displayName={displayName}
-        previewUrl={previewUrl}
-        onImageChange={onImageChange}
-      />
+    <main className="h-screen w-full overflow-hidden bg-white text-black dark:bg-[#0c1014] dark:text-white md:pl-20">
+      <div className="flex h-screen w-full">
+        <SettingsSidebar />
 
-      <div className="mb-6">
-        <label className="mb-2 block text-base font-bold">Name</label>
-        <input
-          value={displayName}
-          onChange={(e) => onDisplayNameChange(e.target.value)}
-          placeholder="Name"
-          className="h-12 w-full rounded-xl border border-zinc-300 bg-transparent px-4 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700"
-        />
-      </div>
+        <section className="h-screen flex-1 overflow-y-auto px-4 py-6 md:px-10 md:py-10">
+          <div className="mx-auto w-full max-w-[650px] xl:ml-[260px]">
+            <h1 className="mb-8 text-2xl font-bold">Edit profile</h1>
 
-      <div className="mb-6">
-        <label className="mb-2 block text-base font-bold">Username</label>
-        <input
-          value={username}
-          onChange={(e) => onUsernameChange(e.target.value)}
-          placeholder="Username"
-          className="h-12 w-full rounded-xl border border-zinc-300 bg-transparent px-4 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700"
-        />
-      </div>
-
-      <div className="mb-6">
-        <label className="mb-2 block text-base font-bold">Website</label>
-        <input
-          disabled
-          placeholder="Website"
-          className="h-12 w-full cursor-not-allowed rounded-xl border border-zinc-300 bg-zinc-100 px-4 text-sm text-zinc-500 outline-none dark:border-zinc-700 dark:bg-[#262a2f]"
-        />
-        <p className="mt-2 text-xs text-zinc-500">
-          Editing your links is only available on mobile. Visit the Instagram
-          app and edit your profile to change the websites in your bio.
-        </p>
-      </div>
-
-      <div className="mb-6">
-        <label className="mb-2 block text-base font-bold">Bio</label>
-        <div className="relative">
-          <textarea
-            value={bio}
-            onChange={(e) => onBioChange(e.target.value)}
-            placeholder="Bio"
-            maxLength={150}
-            className="min-h-[90px] w-full resize-none rounded-xl border border-zinc-300 bg-transparent px-4 py-3 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700"
-          />
-
-          <div className="absolute bottom-3 right-4 text-xs text-zinc-500">
-            {bio.length}/150
+            <EditProfileForm
+              username={username}
+              displayName={displayName}
+              bio={bio}
+              previewUrl={previewUrl}
+              saving={saving}
+              error={error}
+              onUsernameChange={setUsername}
+              onDisplayNameChange={setDisplayName}
+              onBioChange={setBio}
+              onImageChange={handleImageChange}
+              onSubmit={handleSubmit}
+            />
           </div>
-        </div>
+        </section>
       </div>
-
-      <div className="mb-6">
-        <label className="mb-2 block text-base font-bold">
-          Show Threads badge
-        </label>
-
-        <div className="flex h-14 items-center justify-between rounded-xl border border-zinc-300 px-4 dark:border-zinc-700">
-          <span>Show Threads badge</span>
-          <div className="flex h-6 w-11 items-center rounded-full bg-zinc-300 p-1 dark:bg-zinc-700">
-            <div className="h-4 w-4 rounded-full bg-white" />
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <label className="mb-2 block text-base font-bold">Gender</label>
-        <select className="h-12 w-full rounded-xl border border-zinc-300 bg-transparent px-4 text-sm outline-none dark:border-zinc-700">
-          <option>Prefer not to say</option>
-          <option>Male</option>
-          <option>Female</option>
-        </select>
-        <p className="mt-2 text-xs text-zinc-500">
-          This won&apos;t be part of your public profile.
-        </p>
-      </div>
-
-      <div className="mb-8">
-        <label className="mb-2 block text-base font-bold">
-          Show account suggestions on profiles
-        </label>
-
-        <div className="flex items-center justify-between rounded-xl border border-zinc-300 px-4 py-4 dark:border-zinc-700">
-          <div>
-            <div>Show account suggestions on profiles</div>
-            <p className="mt-1 text-xs text-zinc-500">
-              Choose whether people can see similar account suggestions on your
-              profile, and whether your account can be suggested on other
-              profiles.
-            </p>
-          </div>
-
-          <div className="flex h-6 w-11 shrink-0 items-center justify-end rounded-full bg-white p-1 dark:bg-zinc-100">
-            <div className="h-4 w-4 rounded-full bg-black" />
-          </div>
-        </div>
-      </div>
-
-      <p className="mb-8 text-xs text-zinc-500">
-        Certain profile info, like your name, bio and links, is visible to
-        everyone.{" "}
-        <span className="text-[#1877f2]">
-          See what profile info is visible
-        </span>
-      </p>
-
-      {error && (
-        <p className="mb-5 text-sm font-semibold text-red-500">{error}</p>
-      )}
-
-      <div className="flex justify-end">
-        <button
-          disabled={saving}
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#1877f2] text-sm font-bold text-white transition hover:bg-[#2d8cff] disabled:cursor-not-allowed disabled:opacity-60 md:w-[260px]"
-        >
-          {saving && <Loader2 size={16} className="animate-spin" />}
-          {saving ? "Saving..." : "Submit"}
-        </button>
-      </div>
-
-      <footer className="mt-14 pb-10 text-center text-xs text-zinc-500">
-        Meta&nbsp;&nbsp; About&nbsp;&nbsp; Blog&nbsp;&nbsp; Jobs&nbsp;&nbsp;
-        Help&nbsp;&nbsp; API&nbsp;&nbsp; Privacy&nbsp;&nbsp; Terms&nbsp;&nbsp;
-        Locations&nbsp;&nbsp; Instagram Lite&nbsp;&nbsp; Meta AI&nbsp;&nbsp;
-        Threads
-        <div className="mt-5">© 2026 Instagram from Meta</div>
-      </footer>
-    </form>
+    </main>
   );
 }
